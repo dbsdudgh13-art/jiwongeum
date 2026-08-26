@@ -15,8 +15,13 @@ const published = new Set(
 const richness = (s) =>
   (s.support?.length ?? 0) + (s.target?.length ?? 0) + (s.criteria?.length ?? 0);
 
+// 1회차에서 998자짜리 문서가 세 번 연속 반려됐다. 매번 다른 자리에서 같은 종류의 창작이
+// 나왔고, 원인은 원자료가 본문 분량을 감당하지 못한 것이었다. 기준선을 800자 본문에
+// 필요한 수준으로 올린다. 얇은 원자료를 통과시키면 writer 가 채우려고 지어낸다.
+const MIN_SOURCE_CHARS = 1200;
+
 const pool = services
-  .filter((s) => s.open && !published.has(s.id) && richness(s) >= 200)
+  .filter((s) => s.open && !published.has(s.id) && richness(s) >= MIN_SOURCE_CHARS)
   .map((s) => ({
     ...s,
     score:

@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { SITE } from '../../lib/site.mjs';
 import { byId, related, isNoindex, sidoName, targetName, checkedAt } from '../../lib/data.mjs';
+import { publishedServices } from '../../lib/published.mjs';
 
 export async function getStaticPaths() {
   const entries = await getCollection('services');
@@ -17,7 +18,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const s = byId.get(entry.id);
 const { Content } = await render(entry);
-const rel = related(s);
+// 발행된 문서만 후보로 넘긴다. 전체 데이터에서 고르면 없는 페이지로 링크가 걸린다.
+const rel = related(s, await publishedServices());
 const url = new URL(Astro.url.pathname, SITE.url).href;
 // 지역이 판정되지 않은 문서는 지역 링크를 걸지 않는다. 없는 허브로 보내면 404 다.
 const region = s.sido ? { slug: s.sido, name: sidoName(s.sido) } : null;

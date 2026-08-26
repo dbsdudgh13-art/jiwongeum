@@ -35,16 +35,18 @@ export const hubs = {
   target: () => TARGETS.filter((x) => inTarget(x.slug).length >= MIN_HUB_ITEMS),
 };
 
-/** 같은 대상 3개 + 같은 지역 2개. 고아 페이지를 없애기 위한 내부링크. */
-export function related(s, limit = 5) {
-  const pool = new Map();
-  for (const t of s.targets) {
-    for (const o of inTarget(t)) if (o.id !== s.id) pool.set(o.id, o);
-  }
-  const sameTarget = [...pool.values()].slice(0, 3);
-  // 지역 미분류 문서는 지역 기준 관련글을 붙이지 않는다.
+/**
+ * 관련 지원금 추천. 같은 대상 3건 + 같은 지역 2건.
+ *
+ * pool 은 **실제로 페이지가 생성된 서비스**여야 한다. 전체 데이터에서 고르면
+ * 아직 해설이 없는 서비스로 링크가 걸려 404 가 된다. 실제로 그렇게 나갔었다.
+ */
+export function related(s, pool, limit = 5) {
+  const sameTarget = pool.filter((o) => o.id !== s.id && o.targets.some((t) => s.targets.includes(t)));
+  const picked = sameTarget.slice(0, 3);
+  const ids = new Set([s.id, ...picked.map((o) => o.id)]);
   const sameSido = s.sido
-    ? inSido(s.sido).filter((o) => o.id !== s.id && !pool.has(o.id)).slice(0, 2)
+    ? pool.filter((o) => !ids.has(o.id) && o.sido === s.sido).slice(0, 2)
     : [];
-  return [...sameTarget, ...sameSido].slice(0, limit);
+  return [...picked, ...sameSido].slice(0, limit);
 }
