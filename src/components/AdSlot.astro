@@ -1,0 +1,17 @@
+---
+// AdSense 승인 전에는 아무것도 렌더링하지 않는다.
+// 승인 전 빈 광고 컨테이너를 깔아두면 레이아웃만 흔들리고 얻는 게 없다.
+import { SITE } from '../lib/site.mjs';
+// `slot` 은 Astro 예약 속성이라 쓸 수 없다. adSlot 으로 받는다.
+const { adSlot } = Astro.props;
+---
+{SITE.adsenseClient && adSlot && (
+  <ins
+    class="adsbygoogle"
+    style="display:block; margin:24px 0"
+    data-ad-client={SITE.adsenseClient}
+    data-ad-slot={adSlot}
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  />
+)}

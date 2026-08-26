@@ -1,0 +1,134 @@
+---
+import { SITE, TARGETS } from '../lib/site.mjs';
+
+const {
+  title,
+  description = SITE.description,
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+
+const siteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+};
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(siteSchema)} />
+    {jsonLd.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
+
+    {SITE.adsenseClient && (
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE.adsenseClient}`}
+        crossorigin="anonymous"
+      />
+    )}
+
+    <style is:global>
+      :root {
+        --fg: #16181d;
+        --muted: #5b6472;
+        --line: #e3e6ea;
+        --bg: #fff;
+        --accent: #1a56b0;
+        --soft: #f5f7fa;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fg: #e6e8ec;
+          --muted: #9aa4b2;
+          --line: #2a2f38;
+          --bg: #14171c;
+          --accent: #79a9f0;
+          --soft: #1c2027;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.75 system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+        word-break: keep-all;
+      }
+      .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+      header.site { border-bottom: 1px solid var(--line); }
+      header.site .wrap { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; padding-block: 14px; }
+      header.site a.brand { font-weight: 700; font-size: 18px; text-decoration: none; color: var(--fg); }
+      nav.site { display: flex; flex-wrap: wrap; gap: 12px; font-size: 14px; }
+      a { color: var(--accent); }
+      main { padding-block: 28px 48px; }
+      h1 { font-size: 27px; line-height: 1.4; margin: 0 0 8px; }
+      h2 { font-size: 20px; margin-top: 36px; border-top: 1px solid var(--line); padding-top: 24px; }
+      h3 { font-size: 17px; margin-top: 24px; }
+      .lede { color: var(--muted); margin-top: 0; }
+      .facts { background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 4px 16px; margin: 20px 0; }
+      .facts dl { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 14px 0; }
+      .facts dt { color: var(--muted); font-size: 14px; }
+      .facts dd { margin: 0; }
+      ul.cards { list-style: none; padding: 0; display: grid; gap: 10px; }
+      ul.cards li { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+      ul.cards a { font-weight: 600; text-decoration: none; }
+      ul.cards p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+      .badge { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+      .source { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 16px; font-size: 14px; color: var(--muted); }
+      .disclaimer { background: var(--soft); border-left: 3px solid var(--accent); padding: 12px 14px; font-size: 14px; margin: 20px 0; }
+      footer.site { border-top: 1px solid var(--line); padding-block: 24px 40px; font-size: 14px; color: var(--muted); }
+      footer.site nav { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+      nav.crumbs { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+    </style>
+  </head>
+
+  <body>
+    <header class="site">
+      <div class="wrap">
+        <a class="brand" href="/">{SITE.name}</a>
+        <nav class="site">
+          {TARGETS.slice(0, 5).map((t) => <a href={`/target/${t.slug}/`}>{t.name}</a>)}
+          <a href="/region/">지역별</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <nav>
+          <a href="/about/">소개</a>
+          <a href="/privacy/">개인정보처리방침</a>
+          <a href="/terms/">이용약관</a>
+          <a href="/contact/">문의</a>
+        </nav>
+        <p>
+          {SITE.name}은 공공데이터포털이 개방한 «행정안전부 대한민국 공공서비스 정보»를 가공해
+          제공합니다. 실제 지급 여부와 조건은 소관기관 공고를 기준으로 합니다.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

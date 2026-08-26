@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE, TARGETS } from '../lib/site.mjs';
+import { publishedServices } from '../lib/published.mjs';
+import { targetName } from '../lib/data.mjs';
+
+const all = await publishedServices();
+const open = all.filter((s) => s.open);
+const byTarget = TARGETS.map((t) => ({
+  ...t,
+  items: open.filter((s) => s.targets.includes(t.slug)),
+})).filter((t) => t.items.length > 0);
+---
+
+<Base>
+  <h1>{SITE.name}</h1>
+  <p class="lede">{SITE.description}</p>
+
+  {all.length === 0 && (
+    <p class="disclaimer">
+      아직 발행된 지원금 문서가 없습니다. <code>npm run sync</code> 로 공공데이터를 받고,
+      해설 문서를 작성하면 이곳에 표시됩니다.
+    </p>
+  )}
+
+  {byTarget.map((t) => (
+    <>
+      <h2>{t.name} 지원금</h2>
+      <ul class="cards">
+        {t.items.slice(0, 6).map((s) => (
+          <li>
+            <a href={`/s/${s.id}/`}>{s.name}</a>
+            <p>{s.description}</p>
+          </li>
+        ))}
+      </ul>
+      {t.items.length > 6 && <p><a href={`/target/${t.slug}/`}>{t.name} 지원금 전체 보기 ({t.items.length}건)</a></p>}
+    </>
+  ))}
+
+  <h2>이 사이트를 만드는 방식</h2>
+  <p>
+    정부와 지자체가 공공데이터포털에 공개한 공공서비스 정보를 매일 내려받아 정리합니다.
+    각 문서는 원문 공고와 대조해 금액·자격·기간이 일치하는지 확인한 뒤에만 공개하며,
+    모든 페이지에 출처 링크와 데이터 기준일을 표시합니다. 확인되지 않은 내용은 적지 않고
+    «공고 확인»으로 남겨둡니다.
+  </p>
+  <p><a href="/about/">사이트 소개와 편집 원칙 자세히 보기</a></p>
+</Base>

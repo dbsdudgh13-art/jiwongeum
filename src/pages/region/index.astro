@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SIDO, MIN_HUB_ITEMS } from '../../lib/site.mjs';
+import { publishedServices } from '../../lib/published.mjs';
+
+const all = await publishedServices();
+const regions = SIDO
+  .map((r) => ({ ...r, count: all.filter((s) => s.sido === r.slug).length }))
+  .filter((r) => r.count >= MIN_HUB_ITEMS);
+---
+
+<Base
+  title="지역별 지원금"
+  description="시도별로 신청할 수 있는 정부·지자체 지원금을 모았습니다."
+>
+  <nav class="crumbs"><a href="/">홈</a> › 지역별</nav>
+  <h1>지역별 지원금</h1>
+  <p class="lede">거주 지역에서 신청할 수 있는 지원금을 확인하세요.</p>
+
+  {regions.length === 0 && <p class="disclaimer">아직 지역 페이지를 만들 만큼 문서가 쌓이지 않았습니다.</p>}
+
+  <ul class="cards">
+    {regions.map((r) => (
+      <li><a href={`/region/${r.slug}/`}>{r.name}</a><p>{r.count}건</p></li>
+    ))}
+  </ul>
+</Base>

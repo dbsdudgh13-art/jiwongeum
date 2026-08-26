@@ -1,0 +1,58 @@
+name: 공공데이터 동기화
+
+on:
+  schedule:
+    - cron: '0 19 * * *' # UTC 19:00 = KST 04:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+      - run: npm test
+
+      - name: API 동기화
+        env:
+          DATA_GO_KR_KEY: ${{ secrets.DATA_GO_KR_KEY }}
+          DATA_GO_KR_ENDPOINT: ${{ vars.DATA_GO_KR_ENDPOINT }}
+        run: npm run sync
+
+      - run: npm run normalize
+      - run: npm run linkcheck
+
+      - name: 변경 요약 읽기
+        id: diff
+        run: |
+          node -e "
+            const d = require('./data/normalized/diff.json');
+            const n = d.added.length + d.changed.length + d.removed.length;
+            console.log('count=' + n);
+            console.log('body=신규 ' + d.added.length + ' / 변경 ' + d.changed.length + ' / 종료 ' + d.removed.length);
+          " >> "$GITHUB_OUTPUT"
+
+      - name: 변경분 PR 생성
+        if: steps.diff.outputs.count != '0'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/auto-sync
+          title: '데이터 동기화 ${{ github.run_number }}'
+          body: |
+            공공데이터 자동 동기화 결과.
+
+            ${{ steps.diff.outputs.body }}
+
+            머지 전에 로컬에서 `업데이트` 를 실행해 해설 문서를 반영할 것.
+          commit-message: 'chore: 공공데이터 동기화'
+          labels: data-changed
+          add-paths: |
+            data/

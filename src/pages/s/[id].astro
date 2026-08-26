@@ -1,0 +1,122 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { SITE } from '../../lib/site.mjs';
+import { byId, related, isNoindex, sidoName, targetName } from '../../lib/data.mjs';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('services');
+  // 검수를 통과한 해설이 있는 서비스만 페이지를 만든다.
+  // 데이터만 있고 글이 없는 페이지는 '가치 없는 콘텐츠' 판정의 지름길이다.
+  return entries
+    .filter((e) => e.data.reviewed && byId.has(e.id))
+    .map((e) => ({ params: { id: e.id }, props: { entry: e } }));
+}
+
+const { entry } = Astro.props;
+const s = byId.get(entry.id);
+const { Content } = await render(entry);
+const rel = related(s);
+const url = new URL(Astro.url.pathname, SITE.url).href;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'GovernmentService',
+    name: s.name,
+    description: entry.data.description,
+    url,
+    serviceType: '정부 지원금',
+    provider: { '@type': 'GovernmentOrganization', name: s.org },
+    areaServed: { '@type': 'AdministrativeArea', name: sidoName(s.sido) },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE.url },
+      { '@type': 'ListItem', position: 2, name: sidoName(s.sido), item: `${SITE.url}/region/${s.sido}/` },
+      { '@type': 'ListItem', position: 3, name: s.name, item: url },
+    ],
+  },
+  ...(entry.data.faq.length
+    ? [{
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: entry.data.faq.map((f) => ({
+          '@type': 'Question',
+          name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a },
+        })),
+      }]
+    : []),
+];
+---
+
+<Base
+  title={entry.data.title}
+  description={entry.data.description}
+  noindex={isNoindex(s)}
+  jsonLd={jsonLd}
+>
+  <nav class="crumbs">
+    <a href="/">홈</a> › <a href={`/region/${s.sido}/`}>{sidoName(s.sido)}</a>
+  </nav>
+
+  <h1>{s.name}</h1>
+  <p class="lede">{entry.data.description}</p>
+  {!s.open && <p><span class="badge">신청 종료</span></p>}
+
+  <div class="facts">
+    <dl>
+      <dt>지원 내용</dt><dd>{s.support || '공고 확인'}</dd>
+      <dt>지원 대상</dt><dd>{s.criteria || '공고 확인'}</dd>
+      <dt>신청 기간</dt><dd>{s.period || '공고 확인'}</dd>
+      <dt>신청 방법</dt><dd>{s.applyMethod || '공고 확인'}</dd>
+      <dt>소관 기관</dt><dd>{s.org}</dd>
+    </dl>
+  </div>
+
+  <AdSlot adSlot={undefined} />
+
+  <Content />
+
+  <AdSlot adSlot={undefined} />
+
+  {entry.data.faq.length > 0 && (
+    <>
+      <h2>자주 묻는 질문</h2>
+      {entry.data.faq.map((f) => (
+        <>
+          <h3>{f.q}</h3>
+          <p>{f.a}</p>
+        </>
+      ))}
+    </>
+  )}
+
+  <p class="disclaimer">
+    이 페이지는 공공데이터를 정리한 참고 자료입니다. 지원 금액·자격·기간은 예산 사정에 따라
+    바뀔 수 있으므로, 신청 전에 아래 <strong>소관기관 공고 원문</strong>을 반드시 확인하세요.
+  </p>
+
+  {rel.length > 0 && (
+    <>
+      <h2>함께 확인하면 좋은 지원금</h2>
+      <ul class="cards">
+        {rel.map((r) => (
+          <li>
+            <a href={`/s/${r.id}/`}>{r.name}</a>
+            <p>{r.org}{r.targets.length > 0 && ` · ${r.targets.map(targetName).join(', ')}`}</p>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+
+  <p class="source">
+    출처: <a href={s.sourceUrl} rel="nofollow noopener" target="_blank">{s.org} 공고 원문</a><br />
+    데이터 기준일 {s.checkedAt} · 문서 수정일 {entry.data.updated}
+  </p>
+</Base>

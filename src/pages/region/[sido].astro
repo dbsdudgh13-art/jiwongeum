@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SITE, SIDO, MIN_HUB_ITEMS } from '../../lib/site.mjs';
+import { publishedServices } from '../../lib/published.mjs';
+import { targetName } from '../../lib/data.mjs';
+
+export async function getStaticPaths() {
+  const all = await publishedServices();
+  return SIDO
+    .map((r) => ({ r, items: all.filter((s) => s.sido === r.slug) }))
+    .filter(({ items }) => items.length >= MIN_HUB_ITEMS)
+    .map(({ r, items }) => ({ params: { sido: r.slug }, props: { region: r, items } }));
+}
+
+const { region, items } = Astro.props;
+const open = items.filter((s) => s.open);
+const url = new URL(Astro.url.pathname, SITE.url).href;
+
+const jsonLd = [{
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${region.name} 지원금 목록`,
+  url,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: open.length,
+    itemListElement: open.map((s, i) => ({
+      '@type': 'ListItem', position: i + 1, name: s.name, url: `${SITE.url}/s/${s.id}/`,
+    })),
+  },
+}];
+---
+
+<Base
+  title={`${region.name} 지원금 목록`}
+  description={`${region.name}에서 신청할 수 있는 지원금 ${open.length}건의 자격 조건과 신청 방법을 정리했습니다.`}
+  jsonLd={jsonLd}
+>
+  <nav class="crumbs"><a href="/">홈</a> › <a href="/region/">지역별</a> › {region.name}</nav>
+  <h1>{region.name} 지원금</h1>
+  <p class="lede">{region.name} 주민이 신청할 수 있는 지원금 {open.length}건.</p>
+
+  <ul class="cards">
+    {open.map((s) => (
+      <li>
+        <a href={`/s/${s.id}/`}>{s.name}</a>
+        <p>{s.org}{s.targets.length > 0 && ` · ${s.targets.map(targetName).join(', ')}`}</p>
+      </li>
+    ))}
+  </ul>
+</Base>

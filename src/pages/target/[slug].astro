@@ -1,0 +1,67 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SITE, TARGETS, MIN_HUB_ITEMS } from '../../lib/site.mjs';
+import { publishedServices } from '../../lib/published.mjs';
+import { sidoName } from '../../lib/data.mjs';
+
+export async function getStaticPaths() {
+  const all = await publishedServices();
+  return TARGETS
+    .map((t) => ({ t, items: all.filter((s) => s.targets.includes(t.slug)) }))
+    // 항목이 적은 허브는 만들지 않는다. 얇은 조합 페이지가 doorway page 판정을 부른다.
+    .filter(({ items }) => items.length >= MIN_HUB_ITEMS)
+    .map(({ t, items }) => ({ params: { slug: t.slug }, props: { target: t, items } }));
+}
+
+const { target, items } = Astro.props;
+const open = items.filter((s) => s.open);
+const url = new URL(Astro.url.pathname, SITE.url).href;
+
+const jsonLd = [{
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: `${target.name} 지원금 목록`,
+  url,
+  mainEntity: {
+    '@type': 'ItemList',
+    numberOfItems: open.length,
+    itemListElement: open.map((s, i) => ({
+      '@type': 'ListItem', position: i + 1, name: s.name, url: `${SITE.url}/s/${s.id}/`,
+    })),
+  },
+}];
+---
+
+<Base
+  title={`${target.name} 지원금 총정리`}
+  description={`${target.name}이 신청할 수 있는 정부·지자체 지원금 ${open.length}건을 조건과 신청 방법으로 정리했습니다.`}
+  jsonLd={jsonLd}
+>
+  <nav class="crumbs"><a href="/">홈</a> › {target.name}</nav>
+  <h1>{target.name} 지원금 총정리</h1>
+  <p class="lede">
+    현재 신청할 수 있는 {target.name} 대상 지원금 {open.length}건입니다.
+    각 항목은 소관기관 공고 원문과 대조해 정리했습니다.
+  </p>
+
+  <ul class="cards">
+    {open.map((s) => (
+      <li>
+        <a href={`/s/${s.id}/`}>{s.name}</a>
+        <p>{sidoName(s.sido)} · {s.org}</p>
+      </li>
+    ))}
+  </ul>
+
+  {items.length > open.length && (
+    <>
+      <h2>신청이 끝난 지원금</h2>
+      <p class="lede">다음 회차를 기다리는 경우 참고하세요.</p>
+      <ul class="cards">
+        {items.filter((s) => !s.open).map((s) => (
+          <li><a href={`/s/${s.id}/`}>{s.name}</a> <span class="badge">종료</span></li>
+        ))}
+      </ul>
+    </>
+  )}
+</Base>
