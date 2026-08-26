@@ -1,12 +1,12 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { SITE, SIDO, MIN_HUB_ITEMS } from '../../lib/site.mjs';
+import { SITE, MIN_HUB_ITEMS } from '../../lib/site.mjs';
 import { publishedServices } from '../../lib/published.mjs';
-import { targetName } from '../../lib/data.mjs';
+import { targetName, REGIONS } from '../../lib/data.mjs';
 
 export async function getStaticPaths() {
   const all = await publishedServices();
-  return SIDO
+  return REGIONS
     .map((r) => ({ r, items: all.filter((s) => s.sido === r.slug) }))
     .filter(({ items }) => items.length >= MIN_HUB_ITEMS)
     .map(({ r, items }) => ({ params: { sido: r.slug }, props: { region: r, items } }));

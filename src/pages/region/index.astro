@@ -1,10 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { SIDO, MIN_HUB_ITEMS } from '../../lib/site.mjs';
+import { MIN_HUB_ITEMS } from '../../lib/site.mjs';
 import { publishedServices } from '../../lib/published.mjs';
+import { REGIONS } from '../../lib/data.mjs';
 
 const all = await publishedServices();
-const regions = SIDO
+const regions = REGIONS
   .map((r) => ({ ...r, count: all.filter((s) => s.sido === r.slug).length }))
   .filter((r) => r.count >= MIN_HUB_ITEMS);
 ---

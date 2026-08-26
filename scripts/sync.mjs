@@ -6,7 +6,7 @@
 //   DATA_GO_KR_KEY=... node scripts/sync.mjs --probe   1건만 받아 실제 필드명 출력
 //
 // 키가 없으면 기존 스냅샷을 그대로 두고 정상 종료한다. 빌드를 막지 않기 위함.
-import { writeFile, readFile, mkdir, access } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 
 const KEY = process.env.DATA_GO_KR_KEY;
 // 공공데이터포털 상세 페이지의 '요청 URL' 과 다르면 이 환경변수로 덮어쓴다.
@@ -50,18 +50,6 @@ for (let p = 2; p <= pages; p++) {
   const body = await fetchPage(p);
   all.push(...(body.data ?? body.body?.items ?? []));
   process.stdout.write(`\r${all.length}/${total}`);
-}
-
-// 받아온 게 기존보다 반 이하로 줄었으면 API 장애를 의심하고 덮어쓰지 않는다.
-try {
-  await access(OUT);
-  const prev = JSON.parse(await readFile(OUT, 'utf8'));
-  if (prev.length > 0 && all.length < prev.length / 2) {
-    console.error(`\n중단: ${prev.length}건 -> ${all.length}건. API 이상으로 보임. 덮어쓰지 않음.`);
-    process.exit(1);
-  }
-} catch {
-  // 첫 실행이면 비교 대상 없음
 }
 
 await mkdir('data/raw', { recursive: true });

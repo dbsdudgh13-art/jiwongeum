@@ -19,6 +19,8 @@ const s = byId.get(entry.id);
 const { Content } = await render(entry);
 const rel = related(s);
 const url = new URL(Astro.url.pathname, SITE.url).href;
+// 지역이 판정되지 않은 문서는 지역 링크를 걸지 않는다. 없는 허브로 보내면 404 다.
+const region = s.sido ? { slug: s.sido, name: sidoName(s.sido) } : null;
 
 const jsonLd = [
   {
@@ -29,15 +31,17 @@ const jsonLd = [
     url,
     serviceType: '정부 지원금',
     provider: { '@type': 'GovernmentOrganization', name: s.org },
-    areaServed: { '@type': 'AdministrativeArea', name: sidoName(s.sido) },
+    ...(region ? { areaServed: { '@type': 'AdministrativeArea', name: region.name } } : {}),
   },
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: '홈', item: SITE.url },
-      { '@type': 'ListItem', position: 2, name: sidoName(s.sido), item: `${SITE.url}/region/${s.sido}/` },
-      { '@type': 'ListItem', position: 3, name: s.name, item: url },
+      ...(region
+        ? [{ '@type': 'ListItem', position: 2, name: region.name, item: `${SITE.url}/region/${region.slug}/` }]
+        : []),
+      { '@type': 'ListItem', position: region ? 3 : 2, name: s.name, item: url },
     ],
   },
   ...(entry.data.faq.length
@@ -61,7 +65,8 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <nav class="crumbs">
-    <a href="/">홈</a> › <a href={`/region/${s.sido}/`}>{sidoName(s.sido)}</a>
+    <a href="/">홈</a>
+    {region && <> › <a href={`/region/${region.slug}/`}>{region.name}</a></>}
   </nav>
 
   <h1>{s.name}</h1>
@@ -71,10 +76,14 @@ const jsonLd = [
   <div class="facts">
     <dl>
       <dt>지원 내용</dt><dd>{s.support || '공고 확인'}</dd>
-      <dt>지원 대상</dt><dd>{s.criteria || '공고 확인'}</dd>
+      <dt>지원 형태</dt><dd>{s.supportType || '공고 확인'}</dd>
+      <dt>지원 대상</dt><dd>{s.target || '공고 확인'}</dd>
+      {s.criteria && <><dt>선정 기준</dt><dd>{s.criteria}</dd></>}
       <dt>신청 기간</dt><dd>{s.period || '공고 확인'}</dd>
-      <dt>신청 방법</dt><dd>{s.applyMethod || '공고 확인'}</dd>
-      <dt>소관 기관</dt><dd>{s.org}</dd>
+      <dt>신청 방법</dt><dd>{s.applyMethod.length ? s.applyMethod.join(', ') : '공고 확인'}</dd>
+      {s.receiver && <><dt>접수 기관</dt><dd>{s.receiver}</dd></>}
+      <dt>소관 기관</dt><dd>{s.org}{s.dept && ` ${s.dept}`}</dd>
+      {s.contact.length > 0 && <><dt>문의처</dt><dd>{s.contact.join(' / ')}</dd></>}
     </dl>
   </div>
 
@@ -117,6 +126,6 @@ const jsonLd = [
 
   <p class="source">
     출처: <a href={s.sourceUrl} rel="nofollow noopener" target="_blank">{s.org} 공고 원문</a><br />
-    데이터 기준일 {s.checkedAt} · 문서 수정일 {entry.data.updated}
+    데이터 기준일 {s.checkedAt}{s.sourceUpdatedAt && ` · 공고 수정일 ${s.sourceUpdatedAt}`} · 문서 수정일 {entry.data.updated}
   </p>
 </Base>

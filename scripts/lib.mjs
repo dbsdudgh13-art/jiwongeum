@@ -1,48 +1,70 @@
-import { SIDO, TARGETS } from '../src/lib/site.mjs';
+import { SIDO, NATIONAL, TARGETS } from '../src/lib/site.mjs';
 
-// ponytail: 실제 API 응답을 아직 못 봤다. 후보 필드명을 나열해 먼저 맞는 걸 쓴다.
-// API 키 발급 후 응답 한 건 찍어보고 여기만 확정하면 나머지는 안 건드려도 된다.
+// 실제 응답 필드명. Swagger(gov24/v3/serviceList) 와 --probe 출력으로 확인함.
 const FIELD = {
-  id: ['servId', 'SVC_ID', 'serviceId'],
-  name: ['servNm', 'SVC_NM', 'serviceName'],
-  summary: ['servDgst', 'SVC_DGST', 'summary'],
-  org: ['jurOrgNm', 'JUR_ORG_NM', 'orgNm'],
-  ministry: ['jurMnofNm', 'JUR_MNOF_NM'],
-  sourceUrl: ['servDtlLink', 'SVC_DTL_LINK', 'detailUrl'],
-  support: ['sprtCn', 'alwServCn', 'SPRT_CN'],
-  criteria: ['slctCritCn', 'SLCT_CRIT_CN'],
-  applyMethod: ['aplyMtdCn', 'APLY_MTD_CN'],
-  period: ['rqutPrdCn', 'aplyPrdCn', 'RQUT_PRD_CN'],
-  target: ['trgterIndvdlArray', 'TRGTER_INDVDL_ARRAY'],
-  theme: ['intrsThemaArray', 'INTRS_THEMA_ARRAY'],
-  lifecycle: ['lifeArray', 'LIFE_ARRAY'],
+  id: '서비스ID',
+  name: '서비스명',
+  summary: '서비스목적요약',
+  org: '소관기관명',
+  orgType: '소관기관유형',
+  dept: '부서명',
+  sourceUrl: '상세조회URL',
+  supportType: '지원유형',
+  target: '지원대상',
+  criteria: '선정기준',
+  support: '지원내용',
+  applyMethod: '신청방법',
+  receiver: '접수기관',
+  contact: '전화문의',
+  period: '신청기한',
+  category: '서비스분야',
+  userType: '사용자구분',
+  updatedAt: '수정일시',
 };
 
-const pick = (row, keys) => {
-  for (const k of keys) {
-    const v = row?.[k];
-    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
-  }
-  return '';
+const get = (row, key) => {
+  const v = row?.[FIELD[key]];
+  return v === undefined || v === null ? '' : String(v).trim();
 };
 
-/** 서비스 ID를 URL 안전한 slug 로. 원본 ID가 이미 영숫자면 그대로 쓴다. */
+// 신청방법·전화문의는 '||' 로 여러 값을 이어붙여 준다.
+const list = (row, key) =>
+  get(row, key)
+    .split('||')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+/** 20260129201825 형태의 타임스탬프를 YYYY-MM-DD 로. 형식이 다르면 빈 문자열. */
+export function parseStamp(v) {
+  const m = String(v ?? '').match(/^(\d{4})(\d{2})(\d{2})/);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : '';
+}
+
+/** 서비스 ID를 URL 안전한 slug 로. */
 export function slugify(id) {
-  const s = String(id ?? '').trim().toLowerCase();
-  const clean = s.replace(/[^a-z0-9가-힣]+/g, '-').replace(/^-+|-+$/g, '');
+  const clean = String(id ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, '-')
+    .replace(/^-+|-+$/g, '');
   return clean || 'unknown';
 }
 
-/** 기관명에서 시도 slug 추론. 못 찾으면 중앙부처로 본다. */
-export function sidoOf(orgName) {
+/**
+ * 소관기관에서 지역 slug 를 정한다.
+ * - 중앙행정기관 / 공공기관 -> 전국
+ * - 그 밖에는 기관명에 광역단체 정식 명칭이 들어 있을 때만 그 지역
+ * - 판정 불가면 빈 문자열. 지역 허브에서 빠질 뿐 상세 페이지는 정상 생성된다.
+ *
+ * 축약형('부산시설공단' 의 '부산')은 일부러 보지 않는다. '경기도 광주시' 가
+ * 광주광역시로 새는 사고가 실제로 났다. 틀리게 넣느니 비워 두는 편이 낫다.
+ * ponytail: 미분류 약 7%(대부분 지방공기업). 문제가 되면 기관코드 매핑을 붙인다.
+ */
+export function sidoOf(orgName, orgType) {
+  const t = String(orgType ?? '');
+  if (t === '중앙행정기관' || t === '공공기관') return NATIONAL.slug;
   const s = String(orgName ?? '');
-  for (const { slug, name } of SIDO) {
-    if (slug === 'central') continue;
-    // '서울특별시' -> '서울', '경기도' -> '경기' 로도 매칭
-    const short = name.replace(/(특별자치도|특별자치시|특별시|광역시|도)$/, '');
-    if (s.includes(name) || (short.length >= 2 && s.includes(short))) return slug;
-  }
-  return 'central';
+  return SIDO.find((x) => s.includes(x.name))?.slug ?? '';
 }
 
 /** 본문 텍스트에서 대상 slug 목록 추론. */
@@ -52,12 +74,12 @@ export function targetsOf(...texts) {
 }
 
 /**
- * 신청기한 문자열이 이미 지났는지 판단. 판단 불가면 열린 것으로 본다.
- * (닫힌 걸 열렸다고 보는 실수보다, 열린 걸 닫혔다고 숨기는 실수가 더 나쁘다)
+ * 신청기한이 이미 지났는지 판단. 판단 불가면 열린 것으로 본다.
+ * 열린 걸 닫혔다고 숨기는 쪽이 더 큰 손해다.
  */
 export function isOpen(periodText, today) {
   const s = String(periodText ?? '');
-  if (/상시|연중|수시/.test(s)) return true;
+  if (/상시|연중|수시|접수중/.test(s)) return true;
   const dates = [...s.matchAll(/(\d{4})[.\-\/년\s]+(\d{1,2})[.\-\/월\s]+(\d{1,2})/g)].map(
     (m) => `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`
   );
@@ -67,26 +89,36 @@ export function isOpen(periodText, today) {
 
 /** 원본 API 행 하나를 사이트가 쓰는 형태로 정규화. */
 export function normalizeService(row, today) {
-  const id = slugify(pick(row, FIELD.id));
-  const org = pick(row, FIELD.org) || pick(row, FIELD.ministry);
-  const period = pick(row, FIELD.period);
-  const criteria = pick(row, FIELD.criteria);
-  const support = pick(row, FIELD.support);
-  const summary = pick(row, FIELD.summary);
+  const org = get(row, 'org');
+  const orgType = get(row, 'orgType');
   return {
-    id,
-    name: pick(row, FIELD.name),
-    summary,
+    id: slugify(get(row, 'id')),
+    name: get(row, 'name'),
+    summary: get(row, 'summary'),
     org,
-    ministry: pick(row, FIELD.ministry),
-    sourceUrl: pick(row, FIELD.sourceUrl),
-    support,
-    criteria,
-    applyMethod: pick(row, FIELD.applyMethod),
-    period,
-    sido: sidoOf(org),
-    targets: targetsOf(summary, criteria, pick(row, FIELD.target), pick(row, FIELD.lifecycle)),
-    open: isOpen(period, today),
+    orgType,
+    dept: get(row, 'dept'),
+    sourceUrl: get(row, 'sourceUrl'),
+    supportType: get(row, 'supportType'),
+    target: get(row, 'target'),
+    criteria: get(row, 'criteria'),
+    support: get(row, 'support'),
+    applyMethod: list(row, 'applyMethod'),
+    receiver: get(row, 'receiver'),
+    contact: list(row, 'contact'),
+    period: get(row, 'period'),
+    category: get(row, 'category'),
+    userType: get(row, 'userType'),
+    sourceUpdatedAt: parseStamp(get(row, 'updatedAt')),
+    sido: sidoOf(org, orgType),
+    targets: targetsOf(
+      get(row, 'summary'),
+      get(row, 'target'),
+      get(row, 'criteria'),
+      get(row, 'category'),
+      get(row, 'userType')
+    ),
+    open: isOpen(get(row, 'period'), today),
     checkedAt: today,
   };
 }
@@ -94,7 +126,7 @@ export function normalizeService(row, today) {
 /** 발행 가능한 최소 데이터가 있는지. 빈 껍데기 페이지를 막는 게 목적. */
 export function isPublishable(s) {
   return Boolean(
-    s.id && s.id !== 'unknown' && s.name && s.sourceUrl && (s.support || s.criteria)
+    s.id && s.id !== 'unknown' && s.name && s.sourceUrl && (s.support || s.target)
   );
 }
 
@@ -102,16 +134,13 @@ export function isPublishable(s) {
 export function diffServices(prev, next) {
   const prevMap = new Map(prev.map((s) => [s.id, s]));
   const nextMap = new Map(next.map((s) => [s.id, s]));
-  const added = next.filter((s) => !prevMap.has(s.id)).map((s) => s.id);
-  const removed = prev.filter((s) => !nextMap.has(s.id)).map((s) => s.id);
-  const changed = next
-    .filter((s) => {
-      const p = prevMap.get(s.id);
-      if (!p) return false;
-      // checkedAt 은 매일 바뀌므로 비교에서 뺀다. 안 그러면 매일 전건 변경으로 잡힌다.
-      const strip = ({ checkedAt, ...rest }) => JSON.stringify(rest);
-      return strip(p) !== strip(s);
-    })
-    .map((s) => s.id);
-  return { added, changed, removed };
+  // checkedAt 은 매일 바뀌므로 비교에서 뺀다. 안 그러면 매일 전건 변경으로 잡힌다.
+  const strip = ({ checkedAt, ...rest }) => JSON.stringify(rest);
+  return {
+    added: next.filter((s) => !prevMap.has(s.id)).map((s) => s.id),
+    changed: next
+      .filter((s) => prevMap.has(s.id) && strip(prevMap.get(s.id)) !== strip(s))
+      .map((s) => s.id),
+    removed: prev.filter((s) => !nextMap.has(s.id)).map((s) => s.id),
+  };
 }

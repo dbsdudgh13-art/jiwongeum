@@ -23,12 +23,13 @@ export const TARGETS = [
   { slug: 'parenting', name: '임신·육아', keywords: ['임신', '출산', '육아', '보육', '아동'] },
 ];
 
+// 실제 데이터의 소관기관명에 나타나는 광역단체 정식 명칭. 2026-08 기준.
+// 전남과 광주는 '전남광주통합특별시' 로 통합되어 있다. 행정구역이 또 바뀌면 여기만 고친다.
 export const SIDO = [
   { slug: 'seoul', name: '서울특별시' },
   { slug: 'busan', name: '부산광역시' },
   { slug: 'daegu', name: '대구광역시' },
   { slug: 'incheon', name: '인천광역시' },
-  { slug: 'gwangju', name: '광주광역시' },
   { slug: 'daejeon', name: '대전광역시' },
   { slug: 'ulsan', name: '울산광역시' },
   { slug: 'sejong', name: '세종특별자치시' },
@@ -37,12 +38,15 @@ export const SIDO = [
   { slug: 'chungbuk', name: '충청북도' },
   { slug: 'chungnam', name: '충청남도' },
   { slug: 'jeonbuk', name: '전북특별자치도' },
-  { slug: 'jeonnam', name: '전라남도' },
+  { slug: 'jeonnam-gwangju', name: '전남광주통합특별시' },
   { slug: 'gyeongbuk', name: '경상북도' },
   { slug: 'gyeongnam', name: '경상남도' },
   { slug: 'jeju', name: '제주특별자치도' },
-  { slug: 'central', name: '중앙부처' },
 ];
+
+// 중앙행정기관과 공공기관이 운영하는 전국 단위 제도.
+export const NATIONAL = { slug: 'national', name: '전국(중앙부처·공공기관)' };
+
 
 // 시군구 허브는 이 건수 미만이면 만들지 않는다. doorway page 방지.
 export const MIN_HUB_ITEMS = 5;
