@@ -108,8 +108,8 @@ doorway page 판정의 1순위이기 때문이다.
 
 | 파일 | 역할 |
 |---|---|
-| `scripts/sync.mjs` | API 전건 수집. `--probe` 로 실제 필드명 확인 가능. 건수가 이전의 절반 이하로 줄면 API 장애로 보고 덮어쓰지 않는다 |
-| `scripts/normalize.mjs` | 정규화 + 중복 제거 + 발행 가능 여부 판정 + 이전 대비 diff |
+| `scripts/sync.mjs` | API 전건 수집. `--probe` 로 응답 형태 확인 |
+| `scripts/normalize.mjs` | 정규화 + 중복 제거 + 발행 가능 여부 판정 + 이전 대비 diff. 건수가 이전의 절반 이하로 줄면 API 장애로 보고 덮어쓰지 않는다 |
 | `scripts/linkcheck.mjs` | 발행된 문서의 출처 링크 생존 확인. 죽으면 noindex |
 | `scripts/lib.mjs` | 순수 함수 모음. `scripts/lib.test.mjs` 가 assert 로 검증 |
 | `scripts/seed.mjs` | 개발용 샘플 데이터. 모든 항목에 `[샘플]` 표시 |
@@ -145,7 +145,7 @@ sync + normalize → scout → [writer → fact-checker → policy-guard → seo
 /s/<service-id>/           서비스 상세 — 수익 페이지
 /target/<slug>/            대상 허브 8종
 /region/                   지역 인덱스
-/region/<sido>/            시도 허브 17종 + 중앙부처
+/region/<sido>/            지역 허브 — 광역 16종 + 전국(national)
 /guide/<slug>/             가이드 글 (사람이 작성)
 /about /privacy /terms /contact /404
 ```
