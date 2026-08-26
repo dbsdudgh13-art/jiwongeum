@@ -1,0 +1,14 @@
+// Cloudflare Workers 정적 자산 배포 설정.
+// 신규 계정에는 Pages 생성 탭이 없어서 Workers 로 배포한다.
+// 서버 코드는 없다. dist/ 를 그대로 서빙하기만 한다.
+{
+  "name": "jiwongeum",
+  "compatibility_date": "2026-08-26",
+  "assets": {
+    "directory": "./dist",
+    // 없는 주소는 Astro 가 만든 404 페이지를 보여준다.
+    // 기본값(single-page-application)으로 두면 모든 주소가 index.html 을 반환해
+    // 검색엔진이 존재하지 않는 페이지를 정상 페이지로 색인한다.
+    "not_found_handling": "404-page"
+  }
+}
