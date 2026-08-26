@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { SITE } from '../../lib/site.mjs';
-import { byId, related, isNoindex, sidoName, targetName } from '../../lib/data.mjs';
+import { byId, related, isNoindex, sidoName, targetName, checkedAt } from '../../lib/data.mjs';
 
 export async function getStaticPaths() {
   const entries = await getCollection('services');
@@ -126,6 +126,6 @@ const jsonLd = [
 
   <p class="source">
     출처: <a href={s.sourceUrl} rel="nofollow noopener" target="_blank">{s.org} 공고 원문</a><br />
-    데이터 기준일 {s.checkedAt}{s.sourceUpdatedAt && ` · 공고 수정일 ${s.sourceUpdatedAt}`} · 문서 수정일 {entry.data.updated}
+    데이터 기준일 {checkedAt}{s.sourceUpdatedAt && ` · 공고 수정일 ${s.sourceUpdatedAt}`} · 문서 수정일 {entry.data.updated}
   </p>
 </Base>

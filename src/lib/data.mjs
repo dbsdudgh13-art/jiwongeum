@@ -10,7 +10,10 @@ const readJson = (p, fallback) => {
   }
 };
 
-export const services = readJson('data/normalized/services.json', []);
+const snapshot = readJson('data/normalized/services.json', { checkedAt: '', services: [] });
+/** 전체 데이터의 수집 기준일. 레코드마다 들고 있지 않고 여기 한 곳에만 있다. */
+export const checkedAt = snapshot.checkedAt;
+export const services = snapshot.services ?? [];
 export const deadLinks = new Set(readJson('data/normalized/dead-links.json', []).map((d) => d.id));
 
 export const byId = new Map(services.map((s) => [s.id, s]));

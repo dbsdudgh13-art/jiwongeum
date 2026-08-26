@@ -19,7 +19,7 @@ const unique = publishable.filter((s) => (seen.has(s.id) ? false : (seen.add(s.i
 
 let prev = [];
 try {
-  prev = JSON.parse(await readFile(OUT, 'utf8'));
+  prev = JSON.parse(await readFile(OUT, 'utf8')).services ?? [];
 } catch {
   // 첫 실행
 }
@@ -34,7 +34,9 @@ if (prev.length > 0 && unique.length < prev.length / 2) {
 const diff = { date: today, total: unique.length, ...diffServices(prev, unique) };
 
 await mkdir('data/normalized', { recursive: true });
-await writeFile(OUT, JSON.stringify(unique, null, 2) + '\n');
+// 수집 기준일은 레코드마다 붙이지 않고 파일에 한 번만 둔다.
+// 레코드에 넣으면 매일 전건이 변경으로 잡혀 git 이 40배 빨리 커진다(실측 확인).
+await writeFile(OUT, JSON.stringify({ checkedAt: today, services: unique }, null, 2) + '\n');
 await writeFile(DIFF, JSON.stringify(diff, null, 2) + '\n');
 
 console.log(

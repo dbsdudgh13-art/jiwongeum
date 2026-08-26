@@ -119,7 +119,6 @@ export function normalizeService(row, today) {
       get(row, 'userType')
     ),
     open: isOpen(get(row, 'period'), today),
-    checkedAt: today,
   };
 }
 
@@ -134,12 +133,11 @@ export function isPublishable(s) {
 export function diffServices(prev, next) {
   const prevMap = new Map(prev.map((s) => [s.id, s]));
   const nextMap = new Map(next.map((s) => [s.id, s]));
-  // checkedAt 은 매일 바뀌므로 비교에서 뺀다. 안 그러면 매일 전건 변경으로 잡힌다.
-  const strip = ({ checkedAt, ...rest }) => JSON.stringify(rest);
+  const key = (s) => JSON.stringify(s);
   return {
     added: next.filter((s) => !prevMap.has(s.id)).map((s) => s.id),
     changed: next
-      .filter((s) => prevMap.has(s.id) && strip(prevMap.get(s.id)) !== strip(s))
+      .filter((s) => prevMap.has(s.id) && key(prevMap.get(s.id)) !== key(s))
       .map((s) => s.id),
     removed: prev.filter((s) => !nextMap.has(s.id)).map((s) => s.id),
   };

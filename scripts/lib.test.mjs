@@ -80,10 +80,13 @@ assert.equal(isPublishable(empty), false);
 // 출처 링크 없으면 발행 금지 (YMYL: 출처 없는 페이지를 내보내지 않는다)
 assert.equal(isPublishable({ ...n, sourceUrl: '' }), false);
 
-// diffServices — checkedAt 만 다른 건 변경으로 치지 않는다
-const a = [{ id: 'x', name: 'A', checkedAt: '2026-08-25' }, { id: 'y', name: 'B', checkedAt: '2026-08-25' }];
-const b = [{ id: 'x', name: 'A', checkedAt: T }, { id: 'z', name: 'C', checkedAt: T }];
+// 수집 기준일은 레코드에 넣지 않는다. 넣으면 매일 전건이 변경으로 잡힌다
+assert.equal('checkedAt' in n, false);
+
+// diffServices
+const a = [{ id: 'x', name: 'A' }, { id: 'y', name: 'B' }];
+const b = [{ id: 'x', name: 'A' }, { id: 'z', name: 'C' }];
 assert.deepEqual(diffServices(a, b), { added: ['z'], changed: [], removed: ['y'] });
-assert.deepEqual(diffServices(a, [{ id: 'x', name: 'A2', checkedAt: T }]).changed, ['x']);
+assert.deepEqual(diffServices(a, [{ id: 'x', name: 'A2' }]).changed, ['x']);
 
 console.log('lib.test.mjs: 모든 검사 통과');

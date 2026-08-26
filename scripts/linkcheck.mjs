@@ -6,7 +6,7 @@ import { readFile, writeFile, readdir } from 'node:fs/promises';
 const CONCURRENCY = 8;
 const TIMEOUT_MS = 10_000;
 
-const services = JSON.parse(await readFile('data/normalized/services.json', 'utf8'));
+const services = JSON.parse(await readFile('data/normalized/services.json', 'utf8')).services;
 const published = new Set(
   (await readdir('content/services').catch(() => [])).map((f) => f.replace(/\.md$/, ''))
 );
