@@ -58,5 +58,9 @@ jobs:
             머지 전에 로컬에서 `업데이트` 를 실행해 해설 문서를 반영할 것.
           commit-message: 'chore: 공공데이터 동기화'
           labels: data-changed
+          # PR 이 머지되거나 닫히면 브랜치를 지운다.
+          # 브랜치가 남아 있으면 다음 실행이 그것을 갱신만 하고 새 PR 을 만들지 않아,
+          # 변경분이 어디에도 보이지 않는 상태가 된다. 실제로 그렇게 됐다.
+          delete-branch: true
           add-paths: |
             data/
