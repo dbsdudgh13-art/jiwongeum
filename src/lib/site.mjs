@@ -1,6 +1,6 @@
 // 배포 후 커스텀 도메인이 생기면 url 한 줄만 교체한다.
 export const SITE = {
-  url: 'https://jiwongeum.pages.dev',
+  url: 'https://jiwongeum-13u.pages.dev',
   name: '지원금 모아',
   tagline: '정부·지자체 지원금을 한 곳에서',
   description:
