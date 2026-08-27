@@ -7,11 +7,12 @@
 //
 // 키가 없으면 기존 스냅샷을 그대로 두고 정상 종료한다. 빌드를 막지 않기 위함.
 import { writeFile, mkdir } from 'node:fs/promises';
+import { resolveEndpoint } from './lib.mjs';
 
-const KEY = process.env.DATA_GO_KR_KEY;
+const KEY = process.env.DATA_GO_KR_KEY?.trim();
 // 공공데이터포털 상세 페이지의 '요청 URL' 과 다르면 이 환경변수로 덮어쓴다.
-const ENDPOINT =
-  process.env.DATA_GO_KR_ENDPOINT ?? 'https://api.odcloud.kr/api/gov24/v3/serviceList';
+// 비어 있으면 기본값을 쓴다. Actions 는 미등록 변수를 빈 문자열로 넘긴다.
+const ENDPOINT = resolveEndpoint(process.env.DATA_GO_KR_ENDPOINT);
 const PER_PAGE = 500;
 const OUT = 'data/raw/services.json';
 const probe = process.argv.includes('--probe');

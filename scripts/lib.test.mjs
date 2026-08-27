@@ -2,9 +2,18 @@ import assert from 'node:assert/strict';
 import {
   slugify, sidoOf, targetsOf, isOpen, parseStamp,
   normalizeService, isPublishable, diffServices,
+  resolveEndpoint, DEFAULT_ENDPOINT,
 } from './lib.mjs';
 
 const T = '2026-08-26';
+
+// resolveEndpoint — GitHub Actions 는 미등록 변수를 빈 문자열로 넘긴다.
+// '??' 로 받으면 빈 문자열이 통과해 fetch('') 가 되고 Invalid URL 로 터진다. 실제로 터졌다.
+assert.equal(resolveEndpoint(undefined), DEFAULT_ENDPOINT);
+assert.equal(resolveEndpoint(''), DEFAULT_ENDPOINT);
+assert.equal(resolveEndpoint('   '), DEFAULT_ENDPOINT);
+assert.equal(resolveEndpoint('https://example.com/api'), 'https://example.com/api');
+assert.equal(resolveEndpoint('  https://example.com/api  '), 'https://example.com/api');
 
 // slugify
 assert.equal(slugify('000000465790'), '000000465790');

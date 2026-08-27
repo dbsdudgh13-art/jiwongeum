@@ -40,6 +40,20 @@ export function parseStamp(v) {
   return m ? `${m[1]}-${m[2]}-${m[3]}` : '';
 }
 
+/**
+ * 환경변수에서 API 엔드포인트를 정한다.
+ *
+ * GitHub Actions 는 등록되지 않은 vars 를 **빈 문자열**로 넘긴다. `??` 로 받으면
+ * 빈 문자열이 값으로 통과해 `fetch('')` 가 되어 Invalid URL 로 터진다. 실제로 터졌다.
+ * 값이 비어 있으면(공백만 있어도) 기본값을 쓴다.
+ */
+export const DEFAULT_ENDPOINT = 'https://api.odcloud.kr/api/gov24/v3/serviceList';
+
+export function resolveEndpoint(value) {
+  const v = String(value ?? '').trim();
+  return v === '' ? DEFAULT_ENDPOINT : v;
+}
+
 /** 서비스 ID를 URL 안전한 slug 로. */
 export function slugify(id) {
   const clean = String(id ?? '')
