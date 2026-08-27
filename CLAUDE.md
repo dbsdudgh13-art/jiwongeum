@@ -12,7 +12,11 @@
 3. **`reviewed: true` 는 검수를 통과한 뒤에만 올린다.** 이 플래그가 페이지 생성 스위치다.
    writer 는 절대 직접 올리지 않는다.
 4. **`public/ads.txt` 는 AdSense 승인 전에 만들지 않는다.** 미리 만들면 검증에 실패한다.
-5. **얇은 조합 페이지를 만들지 않는다.** 허브는 항목 5건 이상일 때만 생성된다
+5. **인증키는 `.env` 에만 있다.** 어떤 에이전트도 `.env` 를 읽지 않는다. 키 값을
+   출력·인용·요약하지 않고, 사용자에게 채팅으로 붙여넣게 하지 않는다(편집기로 직접
+   넣게 안내한다). 키가 필요한 것은 `scripts/sync.mjs` 하나뿐이고, `process.env` 로만
+   읽는다. 커밋 훅이 유출을 막지만 훅은 마지막 방어선이지 첫 번째가 아니다.
+6. **얇은 조합 페이지를 만들지 않는다.** 허브는 항목 5건 이상일 때만 생성된다
    (`MIN_HUB_ITEMS`). 이 값을 낮추자는 제안은 거절한다. doorway page 판정을 부른다.
 
 ## "업데이트" 파이프라인
@@ -38,6 +42,7 @@
 ## 자주 쓰는 명령
 
 ```bash
+npm run setup      최초 1회. 커밋 훅 활성화 + .env 생성
 npm run dev        로컬 미리보기
 npm test           lib.mjs 자체 검사
 npm run sync       공공데이터 내려받기 (DATA_GO_KR_KEY 필요)
@@ -46,10 +51,22 @@ npm run linkcheck  출처 링크 생존 확인
 npm run build      정적 빌드
 ```
 
-API 키를 처음 받았다면 먼저 실제 응답 형태를 확인한다.
+## 인증키 취급
+
+키는 `.env` 에만 둔다. 저장소에 들어가지 않고(`.gitignore`), 들어가려 하면
+`.githooks/pre-commit` 이 커밋을 막는다. GitHub Actions 에서는 Secrets 가 환경변수로
+주입되므로 `.env` 없이 그대로 돈다.
 
 ```bash
-DATA_GO_KR_KEY=... node scripts/sync.mjs --probe
+npm run setup      # .env 생성
+# 편집기로 .env 를 열어 DATA_GO_KR_KEY 를 채운다. 명령줄에 쓰지 않는다(히스토리에 남는다)
+npm run sync
+```
+
+응답 형태를 확인하려면:
+
+```bash
+node --env-file=.env scripts/sync.mjs --probe
 ```
 
 출력된 필드명을 `scripts/lib.mjs` 의 `FIELD` 에 반영하면 나머지는 건드릴 필요 없다.

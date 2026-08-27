@@ -7,11 +7,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "sync": "node scripts/sync.mjs",
+    "sync": "node --env-file-if-exists=.env scripts/sync.mjs",
     "normalize": "node scripts/normalize.mjs",
     "linkcheck": "node scripts/linkcheck.mjs",
     "test": "node scripts/lib.test.mjs",
-    "seed": "node scripts/seed.mjs && node scripts/normalize.mjs"
+    "seed": "node scripts/seed.mjs && node scripts/normalize.mjs",
+    "setup": "node scripts/setup.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0",

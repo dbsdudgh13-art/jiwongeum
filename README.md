@@ -30,12 +30,19 @@ npm run dev
 ### 2. 동기화
 
 ```bash
-DATA_GO_KR_KEY=발급받은키 npm run sync
+npm run setup
+# 편집기로 .env 를 열어 DATA_GO_KR_KEY 를 채운다
+npm run sync
 npm run normalize
 ```
 
 인증키는 **Decoding** 키를 쓴다. 코드가 한 번 더 인코딩하므로 Encoding 키를 넣으면
-인증에 실패한다. 키는 저장소에 넣지 않고 환경변수와 GitHub Secrets 로만 다룬다.
+인증에 실패한다.
+
+키는 `.env` 에만 둔다. `.gitignore` 에 있고, 실수로 스테이징하면
+`.githooks/pre-commit` 이 커밋을 막는다(64자 hex 문자열도 함께 막는다).
+`npm run setup` 이 훅 경로를 설정하므로 저장소를 새로 받으면 한 번 실행해야 한다.
+명령줄에 키를 직접 쓰지 마라 — 셸 히스토리에 남는다.
 
 `data/raw/` 는 17MB라 저장소에 넣지 않는다. `npm run sync` 로 언제든 다시 만든다.
 

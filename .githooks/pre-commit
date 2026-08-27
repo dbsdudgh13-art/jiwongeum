@@ -1,0 +1,27 @@
+#!/bin/sh
+# 인증키가 저장소에 들어가는 것을 막는다. 우회하려면 --no-verify 를 써야 하므로
+# 실수로는 통과하지 않는다.
+#
+# 활성화: git config core.hooksPath .githooks   (setup 스크립트가 대신 해준다)
+
+fail() { echo "커밋 중단: $1" >&2; exit 1; }
+
+# 1. .env 자체가 스테이징된 경우
+if git diff --cached --name-only | grep -qE '(^|/)\.env$'; then
+  fail ".env 가 스테이징됐다. 인증키가 들어 있는 파일이다. 'git restore --staged .env' 로 빼라."
+fi
+
+# 2. 스테이징된 내용에 인증키로 보이는 문자열이 있는 경우
+#    공공데이터포털 일반 인증키는 64자 hex 다.
+if git diff --cached | grep -qE '^\+.*[0-9a-f]{64}'; then
+  fail "커밋 내용에 64자 hex 문자열이 있다. 공공데이터 인증키로 보인다.
+       실수로 넣은 것이라면 지우고 다시 커밋하라.
+       인증키가 아니라 확신하면: git commit --no-verify"
+fi
+
+# 3. 키를 명령줄에 그대로 쓴 흔적
+if git diff --cached | grep -qE '^\+.*DATA_GO_KR_KEY=[A-Za-z0-9]'; then
+  fail "DATA_GO_KR_KEY 에 값이 직접 적힌 줄이 있다. .env 에만 두고 코드에서는 process.env 로 읽어라."
+fi
+
+exit 0
