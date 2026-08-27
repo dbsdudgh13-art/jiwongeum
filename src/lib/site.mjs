@@ -9,6 +9,8 @@ export const SITE = {
   contactEmail: 'dbsdudgh13@gmail.com',
   // AdSense 승인 후에만 채운다. 값이 있어야 광고 스크립트가 붙는다.
   adsenseClient: '',
+  // Search Console 소유권 확인용. 확인이 끝난 뒤에도 지우면 소유권이 풀린다.
+  googleSiteVerification: 'ULJ_U1WOToQmNEe1VG5eYBXgSItYeC_KNoztW2EKBKg',
 };
 
 // 대상 허브. slug 는 URL 이 되므로 바꾸면 링크가 깨진다.
