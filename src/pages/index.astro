@@ -6,10 +6,20 @@ import { targetName } from '../lib/data.mjs';
 
 const all = await publishedServices();
 const open = all.filter((s) => s.open);
-const byTarget = TARGETS.map((t) => ({
-  ...t,
-  items: open.filter((s) => s.targets.includes(t.slug)),
-})).filter((t) => t.items.length > 0);
+
+// 한 제도가 여러 대상을 지원하면 targets 에 그 대상이 전부 들어간다. 허브에서는 맞지만
+// 홈에서 그대로 쓰면 같은 문서가 섹션마다 반복돼 화면이 중복 덩어리가 된다.
+// 홈에서는 제도마다 한 번씩만, 대상 수가 적은 쪽(= 더 특정한 대상)에 배치한다.
+const shown = new Set();
+const byTarget = TARGETS.map((t) => {
+  const items = open
+    .filter((s) => s.targets.includes(t.slug) && !shown.has(s.id))
+    .sort((a, b) => a.targets.length - b.targets.length)
+    .slice(0, 6);
+  items.forEach((s) => shown.add(s.id));
+  // 해당 대상의 전체 건수는 '전체 보기' 링크 노출 판단에 쓴다.
+  return { ...t, items, total: open.filter((s) => s.targets.includes(t.slug)).length };
+}).filter((t) => t.items.length > 0);
 ---
 
 <Base>
@@ -27,14 +37,16 @@ const byTarget = TARGETS.map((t) => ({
     <>
       <h2>{t.name} 지원금</h2>
       <ul class="cards">
-        {t.items.slice(0, 6).map((s) => (
+        {t.items.map((s) => (
           <li>
             <a href={`/s/${s.id}/`}>{s.name}</a>
             <p>{s.description}</p>
           </li>
         ))}
       </ul>
-      {t.items.length > 6 && <p><a href={`/target/${t.slug}/`}>{t.name} 지원금 전체 보기 ({t.items.length}건)</a></p>}
+      {t.total > t.items.length && (
+        <p><a href={`/target/${t.slug}/`}>{t.name} 지원금 전체 보기 ({t.total}건)</a></p>
+      )}
     </>
   ))}
 
