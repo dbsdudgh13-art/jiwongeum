@@ -28,7 +28,11 @@ jobs:
         run: npm run sync
 
       - run: npm run normalize
-      - run: npm run linkcheck
+
+      # linkcheck 는 여기서 돌리지 않는다.
+      # gov.kr 이 해외 IP 를 막아 GitHub 러너에서는 살아 있는 링크도 전부 실패한다.
+      # 실제로 6건 전부 죽었다고 기록됐고, 그대로 머지됐다면 발행 페이지 전체가
+      # noindex 처리될 뻔했다. 링크 검사는 국내에서 'npm run linkcheck' 로 한다.
 
       - name: 변경 요약 읽기
         id: diff

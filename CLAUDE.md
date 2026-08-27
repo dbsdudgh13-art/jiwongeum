@@ -32,6 +32,8 @@
      policy-guard    정책 검사         <- FAIL 이면 writer 재작업
      seo-editor      제목/설명 정리 후 reviewed: true
 4. npm run linkcheck && npm run build     죽은 링크 확인 + 빌드
+                                          (linkcheck 는 국내에서만 유효하다.
+                                           gov.kr 이 해외 IP 를 막는다)
 5. 결과 보고: 발행 n건, 반려 m건, 사유
 ```
 
