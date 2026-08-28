@@ -8,17 +8,27 @@ const DIR = 'content/services';
 const MIN_BODY = 800;
 
 // «원본 공고» 는 정부 문서를 가리키므로 허용. 그 밖의 «원본» 은 내부 데이터 지칭이라 금지.
-// 독자에게 파이프라인 사정을 말하는 표현은 policy-guard 가 반복해서 반려했다.
 const BANNED = [
   { re: /원본(?!\s*공고)\s*(자료|정보|데이터)?\s*(에는|에|은|는|이|가)?\s*(나와|명시|적혀|없|비어|갱신)/, why: '독자에게 내부 데이터를 지칭했다. «공고» 로 바꿔라' },
   { re: /필드(에|가|는)/, why: '데이터 필드를 독자에게 노출했다' },
   { re: /수집된 정보/, why: '파이프라인 노출' },
   // '무조건 ~ 아닙니다' 처럼 부정문에 쓰인 경우는 단정을 부정하는 문장이라 제외한다.
   { re: /무조건(?!.*(아닙니다|않습니다|없습니다))|100%\s*(승인|지원|가능)|누구나 받을 수 있/, why: 'AdSense 과장·보증 표현' },
+
+  // policy-guard 가 여러 문서에서 글자 그대로 반복된다고 잡아낸 상투구.
+  // 문장 틀이 같으면 제목이 달라도 '겉만 바꾼' 대량생성으로 판정된다.
+  // 한 번 쓰였다고 문제인 표현은 아니지만, 쓰지 않는 편이 안전하므로 아예 막는다.
+  // 새 상투구가 적발되면 여기에 추가한다.
+  { re: /가 운영하는 사업(으로|입니다)/, why: '여러 문서에서 반복된 도입부 상투구다. 이 제도에 맞는 문장으로 다시 써라' },
+  { re: /안내되어 있고, 접수는/, why: '여러 문서에서 반복된 접수 안내 상투구다' },
+  { re: /확인하는 것이 정확합니다/, why: '여러 문서에서 반복된 맺음 상투구다' },
+  { re: /시기는 접수기관마다 다르다/, why: '여러 문서에서 반복된 h2 상투구다. 원본 period 문구는 본문에서 쓰고 제목은 달리 지어라' },
 ];
 
-// 마크다운에 섞여 들어간 태그. 페이지에 그대로 찍힌다.
 const STRAY_TAG = /^\s*<\/?(content|document|file|answer|result)>\s*$/;
+
+// 같은 h2 가 이 개수 이상 문서에 반복되면 대량생성 신호다.
+const MIN_DOCS = 3;
 
 const files = (await readdir(DIR)).filter((f) => f.endsWith('.md'));
 const problems = [];
@@ -51,10 +61,9 @@ for (const f of files) {
   if (!/^title:/m.test(front)) add('title 없음');
   if (!/^description:/m.test(front)) add('description 없음');
   if (!/^updated:/m.test(front)) add('updated 없음');
-  // 따옴표 없는 날짜는 YAML 이 Date 객체로 파싱해 z.string() 검증에서 떨어진다.
-  // 빌드가 통째로 실패하는데 에러 메시지가 원인을 바로 알려주지 않아 찾기 어렵다.
+  // 따옴표 없는 날짜는 YAML 이 Date 로 파싱해 z.string() 검증에서 떨어진다.
   if (/^updated:\s*\d{4}-\d{2}-\d{2}\s*$/m.test(front)) {
-    add('updated 날짜에 따옴표가 없다. YAML 이 Date 로 파싱해 빌드가 실패한다 -> updated: "YYYY-MM-DD"');
+    add('updated 날짜에 따옴표가 없다. YAML 이 Date 로 파싱해 빌드가 실패한다');
   }
 
   for (const h of body.match(/^## .*$/gm) ?? []) {
@@ -63,9 +72,8 @@ for (const f of files) {
   }
 }
 
-// 같은 h2 제목이 3개 이상 문서에 반복되면 대량생성 신호다. 두 회차 연속 반려 사유였다.
 for (const [h, ids] of headings) {
-  if (ids.length >= 3) problems.push(`h2 중복 ${ids.length}건: "${h}" -> ${ids.join(', ')}`);
+  if (ids.length >= MIN_DOCS) problems.push(`h2 중복 ${ids.length}건: "${h}" -> ${ids.join(', ')}`);
 }
 
 console.log(`문서 ${files.length}건, h2 ${headings.size}개 검사`);
