@@ -79,7 +79,8 @@ data/normalized/services.json  정규화 데이터
 data/normalized/diff.json      이전 대비 신규/변경/종료
    │
    ├─ 변경 없음 → 종료
-   └─ 변경 있음 → PR 자동 생성 (label: data-changed)
+   ├─ 발행분과 무관 → main 에 자동 커밋 → Cloudflare 자동 배포
+   └─ 발행분이 바뀜 → PR 생성 (label: needs-review)
                      │  사람이 "업데이트" 실행
                      ▼
               에이전트 파이프라인 → content/services/*.md
@@ -213,7 +214,7 @@ FAQ → 면책 문구 → 관련 지원금 5건 → 출처 링크와 기준일.
 
 | 주기 | 주체 | 내용 |
 |---|---|---|
-| 매일 04:00 | Actions | API 동기화, 변경 시 PR |
+| 매일 04:00 | Actions | API 동기화. 발행분 무관하면 자동 커밋, 발행분 영향 시에만 PR |
 | 주 1회 | 사람이 "업데이트" | 에이전트 파이프라인, 20~40건 |
 | 월 1회 | `scout` | Search Console 데이터로 우선순위 재조정 |
 | 분기 1회 | 사람 | 가이드 글 2~3편 직접 작성 (E-E-A-T 보강) |
