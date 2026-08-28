@@ -12,7 +12,8 @@
     "linkcheck": "node scripts/linkcheck.mjs",
     "test": "node scripts/lib.test.mjs",
     "seed": "node scripts/seed.mjs && node scripts/normalize.mjs",
-    "setup": "node scripts/setup.mjs"
+    "setup": "node scripts/setup.mjs",
+    "contentcheck": "node scripts/contentcheck.mjs"
   },
   "dependencies": {
     "astro": "^5.0.0",
