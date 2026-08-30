@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-08-29",
+  "checkedAt": "2026-08-30",
   "services": [
     {
       "id": "000000465790",
@@ -18831,6 +18831,33 @@
         "jobseeker"
       ],
       "open": true
+    },
+    {
+      "id": "174100000113",
+      "name": "고유가 피해지원금 지급 서비스 안내",
+      "summary": "국민의 70% 대상으로 소득계층별·지역별 차등 지원",
+      "org": "행정안전부",
+      "orgType": "중앙행정기관",
+      "dept": "재정정책과",
+      "sourceUrl": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/174100000113",
+      "supportType": "현금",
+      "target": "국민의  70%",
+      "criteria": "국민의  70%\r\n * 건강보험료 기준(별도 산정)",
+      "support": "1차) 기초생활수급(55만원), 차상위 한부모(45만원)\r\n * 비수도권, 인구감소지역은 5만원 추가 지급\r\n\r\n2차) 소득하위 70% 국민(수도권 10만원, 비수도권 15만원, 인구감소지역 중 우대지원지역 20만원, 인구감소지역 중 특별지원지역 25만원)",
+      "applyMethod": [
+        "직접입력"
+      ],
+      "receiver": "",
+      "contact": [
+        "고유가 피해지원금 콜센터/1670-2626"
+      ],
+      "period": "2026.05.18~2026.07.03",
+      "category": "행정·안전",
+      "userType": "개인||가구",
+      "sourceUpdatedAt": "2026-08-31",
+      "sido": "national",
+      "targets": [],
+      "open": false
     },
     {
       "id": "179038700004",
@@ -63856,7 +63883,7 @@
       "period": "상시신청",
       "category": "임신·출산",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-28",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "ulsan",
       "targets": [
         "parenting"
@@ -140946,6 +140973,7 @@
       "criteria": "",
       "support": "○ 난임시술 시 신선배아 2회 / 각 90만원(1인 180만원)",
       "applyMethod": [
+        "정부24온라인신청",
         "방문신청"
       ],
       "receiver": "",
@@ -140955,7 +140983,7 @@
       "period": "상시신청",
       "category": "임신·출산",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-13",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "jeonnam-gwangju",
       "targets": [
         "parenting"
@@ -141177,6 +141205,7 @@
       "criteria": "",
       "support": "○ 난임진단을 받은 검사 시 발생한 기초검진비 지원\r\n\r\n○ 진찰료 및 기본검사료 - 정액검사, 자궁난관조영술, 배란검사, 초음파검사, 호르몬검사 등",
       "applyMethod": [
+        "정부24온라인신청",
         "방문신청"
       ],
       "receiver": "",
@@ -141186,7 +141215,7 @@
       "period": "상시신청",
       "category": "임신·출산",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-04-24",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "jeonnam-gwangju",
       "targets": [
         "parenting"
@@ -141438,6 +141467,7 @@
       "criteria": "",
       "support": "○ 산모 건강관리 : 유방관리, 부종관리, 영양관리, 좌욕지원, 산후 위생관리\r\n\r\n○ 신생아 건강관리 : 신생아 청결·위생관리(목욕, 배꼽관리, 기저귀교체, 용품소독), 수유 및 예방접종 지원\r\n\r\n○ 산모·신생아 가사지원 : 산모 식사준비, 산모 및 신생아 주 생활공간 청소, 산모 및 신생아 의류 세탁\r\n\r\n○ 산모 정보제공 및 정서지원 : 응급상황 발견 및 대응, 감염 예방 및 관리, 정서 상태 이해 및 지지\r\n ※ 산모·신생아 외 다른 가족 돌봄이나 일반 가사활동영역은 표준 서비스에 포함되지 않는 부가 서비스이므로 원하는 경우 별도로 추가구매가 필요함",
       "applyMethod": [
+        "정부24온라인신청",
         "방문신청"
       ],
       "receiver": "",
@@ -141447,7 +141477,7 @@
       "period": "상시신청",
       "category": "임신·출산",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-13",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "jeonnam-gwangju",
       "targets": [
         "parenting"
@@ -185371,7 +185401,7 @@
       "period": "상시신청",
       "category": "생활안정",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-12",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "gyeongnam",
       "targets": [],
       "open": true
@@ -278983,19 +279013,20 @@
       "supportType": "시설이용",
       "target": "국민기초생활수급자, 장애인\r\n국가유공자\r\n다문화, 한부모가족\r\n경로우대자, 청소년, 어린이 등\r\n\r\n※세부사항은 통영 스포츠파크, 통영 체육청소년센터 홈페이지에서 확인 가능합니다.",
       "criteria": "",
-      "support": "이용료 감면",
+      "support": "국민기초생활수급자, 장애인\r\n국가유공자\r\n다문화, 한부모가족\r\n경로우대자, 청소년, 어린이 등\r\n\r\n※세부사항은 통영 스포츠파크, 통영 체육청소년센터 홈페이지에서 확인 가능합니다.",
       "applyMethod": [
         "방문신청"
       ],
       "receiver": "",
       "contact": [
         "산양스포츠파크/055-643-6840",
-        "통영청소년체육센터/055-643-6665"
+        "통영청소년체육센터/055-643-6665",
+        "통영수영장/055-649-8863"
       ],
       "period": "상시신청",
       "category": "문화·환경",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-28",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "",
       "targets": [
         "single-parent",
@@ -279014,18 +279045,18 @@
       "supportType": "시설이용",
       "target": "국가유공자, 상이국가유공자\r\n장애인\r\n경로우대자, 만4세미만 등\r\n\r\n※세부사항은 통영케이블카 홈페이지에서 확인 가능합니다.",
       "criteria": "",
-      "support": "이용료 감면",
+      "support": "이용료 감면(국가유공자, 상이국가유공자, 장애인, 경로우대자, 만4세미만 등)\r\n\r\n※세부사항은 통영케이블카 홈페이지에서 확인 가능합니다.",
       "applyMethod": [
         "방문신청"
       ],
       "receiver": "",
       "contact": [
-        "통영관광개발공사 경영지원팀/055-650-6799"
+        "통영관광개발공사 경영지원부/055-640-3804"
       ],
       "period": "상시신청",
       "category": "문화·환경",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-28",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "",
       "targets": [
         "disabled"
@@ -279043,7 +279074,7 @@
       "supportType": "시설이용",
       "target": "기초생활수급자, 5.18 민주유공자\r\n국가유공자 및 유족이나 가족\r\n경로우대자, 만6세 미만(디피랑), 만7세이하(수산과학관)\r\n병역법에 의거한 군인(수산과학관)\r\n의사자 유족 및 의상자 등\r\n\r\n※ 세부사항은 수산과학관, 디피랑 홈페이지에서 확인 가능합니다",
       "criteria": "",
-      "support": "이용료 감면",
+      "support": "기초생활수급자, 5.18 민주유공자\r\n국가유공자 및 유족이나 가족\r\n경로우대자, 만6세 미만(디피랑), 만7세이하(수산과학관)\r\n병역법에 의거한 군인(수산과학관)\r\n의사자 유족 및 의상자 등\r\n\r\n※ 세부사항은 수산과학관, 디피랑 홈페이지에서 확인 가능합니다",
       "applyMethod": [
         "방문신청"
       ],
@@ -279056,7 +279087,7 @@
       "period": "상시신청",
       "category": "문화·환경",
       "userType": "개인",
-      "sourceUpdatedAt": "2026-08-28",
+      "sourceUpdatedAt": "2026-08-30",
       "sido": "",
       "targets": [],
       "open": true
