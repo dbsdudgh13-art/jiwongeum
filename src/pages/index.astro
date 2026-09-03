@@ -20,6 +20,13 @@ const byTarget = TARGETS.map((t) => {
   // 해당 대상의 전체 건수는 '전체 보기' 링크 노출 판단에 쓴다.
   return { ...t, items, total: open.filter((s) => s.targets.includes(t.slug)).length };
 }).filter((t) => t.items.length > 0);
+
+// 대상 분류가 비어 있는 제도가 있다. '돌봄이 필요한 도민 누구나' 처럼 원문이
+// 특정 계층을 지목하지 않으면 targetsOf() 가 빈 배열을 낸다. 분류가 틀린 게 아니다.
+// 다만 홈이 대상군으로만 묶여 있어서 이런 문서는 어느 섹션에도 실리지 않는다.
+// 지역 허브도 5건 미만이면 안 만들므로, 사이트맵 말고는 들어갈 길이 없는 고아가 된다.
+// 새 URL 을 만들지 않고 홈에 섹션 하나로 받는다.
+const unlisted = open.filter((s) => s.targets.length === 0);
 ---
 
 <Base>
@@ -49,6 +56,20 @@ const byTarget = TARGETS.map((t) => {
       )}
     </>
   ))}
+
+  {unlisted.length > 0 && (
+    <>
+      <h2>대상을 가리지 않는 지원금</h2>
+      <ul class="cards">
+        {unlisted.map((s) => (
+          <li>
+            <a href={`/s/${s.id}/`}>{s.name}</a>
+            <p>{s.description}</p>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
 
   <h2>이 사이트를 만드는 방식</h2>
   <p>
